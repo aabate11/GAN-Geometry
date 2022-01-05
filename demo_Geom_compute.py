@@ -4,13 +4,23 @@ from core import get_full_hessian, hessian_compute, save_imgrid, show_imgrid
 from core.GAN_utils import DCGAN_wrapper, loadDCGAN, BigGAN_wrapper, loadBigGAN, upconvGAN
 import torch
 import lpips
+import matplotlib.pyplot as plt
 ImDist = lpips.LPIPS(net="squeeze", )
 
 #%%
 BGAN = loadBigGAN()  # Default to be "biggan-deep-256"
+
 BGAN.cuda().eval()
 BGAN.requires_grad_(False)
 G = BigGAN_wrapper(BGAN)
+
+
+feats = G.sample_vector(device="cuda", class_id=321, sampn=2).detach().clone()
+# im = G.visualize_batch(feats)
+# # print(im[0].shape, np.max(im), np.min(im), im)
+# show_imgrid(im)
+
+
 #%%
 feat = G.sample_vector(device="cuda", class_id=321).detach().clone()
 eva_FI, evc_FI, H_FI = hessian_compute(G, feat, ImDist, hessian_method="ForwardIter", cutoff=10)

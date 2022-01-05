@@ -241,7 +241,7 @@ def visualize_np(G, code, layout=None, show=True):
     return imgs
 
 #%% Various GAN wrappers.
-#%% BigGAN wrapper 
+#%% BigGAN wrapper
 def loadBigGAN(version="biggan-deep-256"):
     from pytorch_pretrained_biggan import BigGAN, truncated_noise_sample, BigGANConfig
     if platform == "linux":
@@ -360,7 +360,7 @@ class BigBiGAN_wrapper():#nn.Module
 
     def render(self, codes_all_arr, B=15, resolution=256, scale=1.0, ):
         img_tsr = self.visualize_batch_np(codes_all_arr, scale=scale, resolution=resolution, B=B)
-        return [img.permute([1,2,0]).numpy() for img in img_tsr]    
+        return [img.permute([1,2,0]).numpy() for img in img_tsr]
 
     # def render(self, codes_all_arr, B=15, scale=1.0, resolution=256):
     #     img_tsr = None
@@ -374,7 +374,7 @@ class BigBiGAN_wrapper():#nn.Module
     #             img_tsr = img_list if img_tsr is None else torch.cat((img_tsr, img_list), dim=0)
     #             csr = csr_end
     #     return [img.permute([1,2,0]).numpy() for img in img_tsr]
-#%% StyleGAN2 wrapper 
+#%% StyleGAN2 wrapper
 import sys
 if platform == "linux":  # CHPC cluster
     StyleGAN2_root = r"/home/binxu/stylegan2-pytorch"
@@ -571,15 +571,15 @@ class StyleGAN_wrapper():  # nn.Module
                                           wspace=wspace, noise=noise)
         return [img.permute([1,2,0]).numpy() for img in img_tsr]
 # G = StyleGAN_wrapper(generator)
-#%% PGGAN load 
-def loadPGGAN(onlyG=True): 
+#%% PGGAN load
+def loadPGGAN(onlyG=True):
     model = torch.hub.load('facebookresearch/pytorch_GAN_zoo:hub',
                        'PGAN', model_name='celebAHQ-256',
                        pretrained=True, useGPU=True)
     if onlyG:
         return model.avgG
     else:
-        return model 
+        return model
 
 class PGGAN_wrapper():  # nn.Module
     """
@@ -619,14 +619,14 @@ class PGGAN_wrapper():  # nn.Module
 # G = PGGAN_wrapper(model.avgG)
 
 
-#%% DCGAN load 
-def loadDCGAN(onlyG=True): 
-    model = torch.hub.load('facebookresearch/pytorch_GAN_zoo:hub', 
+#%% DCGAN load
+def loadDCGAN(onlyG=True):
+    model = torch.hub.load('facebookresearch/pytorch_GAN_zoo:hub',
             'DCGAN', pretrained=True, useGPU=True)
     if onlyG:
         return model.avgG
     else:
-        return model 
+        return model
 
 class DCGAN_wrapper():  # nn.Module
     def __init__(self, DCGAN, ):

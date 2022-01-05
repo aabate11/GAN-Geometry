@@ -24,37 +24,10 @@ from PIL import Image
 from IPython.display import clear_output
 from .build_montages import build_montages, color_framed_montages
 from .torch_utils import progress_bar
-load_urls = False
-if platform == "linux":  # CHPC cluster
-    # homedir = os.path.expanduser('~')
-    # netsdir = os.path.join(homedir, 'Generate_DB/nets')
-    homedir = "/scratch/binxu"
-    netsdir = "/scratch/binxu/torch/checkpoints"
-    load_urls = True # note it will try to load from $TORCH_HOME\checkpoints\"upconvGAN_%s.pt"%"fc6"
-    # ckpt_path = {"vgg16": "/scratch/binxu/torch/vgg16-397923af.pth"}
-else:
-    if os.environ['COMPUTERNAME'] == 'DESKTOP-9DDE2RH':  # PonceLab-Desktop 3
-        homedir = "D:/Generator_DB_Windows"
-        netsdir = os.path.join(homedir, 'nets')
-    elif os.environ['COMPUTERNAME'] == 'PONCELAB-ML2C':  # PonceLab-Desktop Victoria
-        homedir = r"C:\Users\ponce\Documents\Generator_DB_Windows"
-        netsdir = os.path.join(homedir, 'nets')
-    elif os.environ['COMPUTERNAME'] == 'PONCELAB-ML2B':
-        homedir = r"C:\Users\Ponce lab\Documents\Python\Generator_DB_Windows"
-        netsdir = os.path.join(homedir, 'nets')
-    elif os.environ['COMPUTERNAME'] == 'PONCELAB-ML2A':
-        homedir = r"C:\Users\Poncelab-ML2a\Documents\Python\Generator_DB_Windows"
-        netsdir = os.path.join(homedir, 'nets')
-    elif os.environ['COMPUTERNAME'] == 'DESKTOP-MENSD6S':  # Home_WorkStation
-        homedir = "E:/Monkey_Data/Generator_DB_Windows"
-        netsdir = os.path.join(homedir, 'nets')
-    elif os.environ['COMPUTERNAME'] == 'DESKTOP-9LH02U9':  # Home_WorkStation Victoria
-        homedir = "C:/Users/zhanq/OneDrive - Washington University in St. Louis/Generator_DB_Windows"
-        netsdir = os.path.join(homedir, 'nets')
-    else:
-        load_urls = True
-        homedir = os.path.expanduser('~')
-        netsdir = os.path.join(homedir, 'Documents/nets')
+
+load_urls = True
+homedir = os.path.expanduser('~')
+netsdir = os.path.join(homedir, 'Documents/nets')
 
 model_urls = {"pool5" : "https://onedrive.live.com/download?cid=9CFFF6BCB39F6829&resid=9CFFF6BCB39F6829%2145337&authkey=AFaUAgeoIg0WtmA",
     "fc6": "https://onedrive.live.com/download?cid=9CFFF6BCB39F6829&resid=9CFFF6BCB39F6829%2145339&authkey=AC2rQMt7Obr0Ba4",
@@ -244,13 +217,7 @@ def visualize_np(G, code, layout=None, show=True):
 #%% BigGAN wrapper
 def loadBigGAN(version="biggan-deep-256"):
     from pytorch_pretrained_biggan import BigGAN, truncated_noise_sample, BigGANConfig
-    if platform == "linux":
-        cache_path = "/scratch/binxu/torch/"
-        cfg = BigGANConfig.from_json_file(join(cache_path, "%s-config.json" % version))
-        BGAN = BigGAN(cfg)
-        BGAN.load_state_dict(torch.load(join(cache_path, "%s-pytorch_model.bin" % version)))
-    else:
-        BGAN = BigGAN.from_pretrained(version)
+    BGAN = BigGAN.from_pretrained(version)
     for param in BGAN.parameters():
         param.requires_grad_(False)
     # embed_mat = BGAN.embeddings.parameters().__next__().data

@@ -37,6 +37,7 @@ mtg, codes_all, = vis_eigen_explore(feat.cpu().numpy(), evc_FI, eva_FI, G, ImDis
 vis_distance_curve(feat.cpu().numpy(), evc_FI, eva_FI, G, ImDist, eiglist=[1,2,3,4,7],
                    maxdist=0.6, rown=7, sphere=False, distrown=15, namestr="demo")
 
+plt.savefig("what_is_it.png")
 #%% DCGAN
 # DG = loadDCGAN()
 # DG.cuda().eval()

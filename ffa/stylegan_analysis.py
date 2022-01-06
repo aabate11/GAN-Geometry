@@ -48,11 +48,11 @@ print("neural model is loaded!")
 geom_path = "/home/ratan/Documents/packages/GAN-Geometry"
 sys.path.append(geom_path)
 from core import get_full_hessian, hessian_compute, save_imgrid, show_imgrid
-from core.GAN_utils import StyleGAN2_wrapper
+from core.GAN_utils import StyleGAN2CUSTOM_wrapper
 from core.hessian_axis_visualize import vis_eigen_action, vis_eigen_explore, vis_distance_curve
 
 
-G = StyleGAN2_wrapper(SGAN)
+G = StyleGAN2CUSTOM_wrapper(SGAN)
 
 #%%
 feat = G.sample_vector(device="cuda", class_id=321).detach().clone()

@@ -624,6 +624,38 @@ class DCGAN_wrapper():  # nn.Module
         img_tsr = self.visualize_batch_np(codes_all_arr, scale=scale, B=B)
         return [img.permute([1,2,0]).numpy() for img in img_tsr]
 
+
+### CUSTOM CLASS FOR STYLEGAN2 WITHOUT TrUNCATION:
+class StyleGAN2CUSTOM_wrapper():
+    def __init__(self, SGAN):
+        self.sgan = SGAN
+        self.class = None   #necessary class label for unconditional gan
+
+    def sample_vector(self, sampn=1, device="cuda"):
+        refvec = torch.randn((sampn, self.sgan.z_dim)).to(device)
+        return refvec
+
+    def visualize(self, code, scale=1.0):
+        imgs = self.sgan(code, self.class)
+        return torch.clamp((imgs + 1.0) / 2.0, 0, 1) * scale
+
+    def visualize_batch_np(self, codes_all_arr, scale=1.0, B=5):
+        csr = 0
+        img_all = None
+        imgn = codes_all_arr.shape[0]
+        while csr < imgn:
+            csr_end = min(csr + B, imgn)
+            with torch.no_grad():
+                img_list = self.visualize(torch.from_numpy(codes_all_arr[csr:csr_end, :]).float().cuda(),
+                        scale=scale).cpu()
+            img_all = img_list if img_all is None else torch.cat((img_all, img_list), dim=0)
+            csr = csr_end
+        return img_all
+
+    def render(self, codes_all_arr, scale=1.0, B=50):
+        img_tsr = self.visualize_batch_np(codes_all_arr, scale=scale, B=B)
+        return [img.permute([1,2,0]).numpy() for img in img_tsr]
+
 #%% The first time to run this you need these modules
 if __name__ == "__main__":
     import sys

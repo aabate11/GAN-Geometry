@@ -55,7 +55,7 @@ from core.hessian_axis_visualize import vis_eigen_action, vis_eigen_explore, vis
 G = StyleGAN2CUSTOM_wrapper(SGAN)
 
 #%%
-feat = G.sample_vector(device="cuda", class_id=321).detach().clone()
+feat = G.sample_vector(device=device).detach().clone()
 eva_FI, evc_FI, H_FI = hessian_compute(G, feat, ImDist, hessian_method="ForwardIter", cutoff=10)
 
 #%%

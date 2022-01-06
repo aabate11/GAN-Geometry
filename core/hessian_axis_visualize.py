@@ -1,19 +1,19 @@
 """Visualize the Visual contents of the Hessian Eigenvectors
 Achieve functions like:
 
-- Visualize image change along the Hessian eigen vectors for a reference vector. 
+- Visualize image change along the Hessian eigen vectors for a reference vector.
     - `vis_eigen_frame`: Useful to plot the full spectrum
     - `vis_eigen_explore`: Useful to plot selected eigen axes
-    - `vis_eigen_explore_row`: Save montage figure for each row. 
-- Compare effect of travelling along an eigenvector at multiple reference vectors. 
+    - `vis_eigen_explore_row`: Save montage figure for each row.
+- Compare effect of travelling along an eigenvector at multiple reference vectors.
     - `vis_eigen_action`
-    - `vis_eigen_action_row`: Save montage figure for each row. 
+    - `vis_eigen_action_row`: Save montage figure for each row.
 - Plot the image distance curve, as a function of latent distance from reference image.
-    - `vis_distance_curve` 
+    - `vis_distance_curve`
 
-All of these have similar APIs. 
+All of these have similar APIs.
 
-Documentation added. 
+Documentation added.
 Binxu Wang. 2021 Mar.9th
 """
 import torch
@@ -31,32 +31,32 @@ from .build_montages import build_montages, color_framed_montages
 from .geometry_utils import SLERP, LERP, LExpMap, SExpMap
 
 def vis_eigen_frame(eigvect_avg, eigv_avg, G, ref_code=None, eiglist=None, eig_rng=(0, 4096), page_B=50, transpose=True,
-                    maxdist=120, rown=7, sphere=False, 
+                    maxdist=120, rown=7, sphere=False,
                     figdir="", RND=None, namestr="", ):
     """ Visualize image content of moving along Hessian Eigen frame at one `ref_code`
     Go through spectrum in batch, and plot `page_B` number of directions in a page, `rown` in a row.
-    
+
     Input:
         eigvect_avg: Eigenvectors to visualize, numpy array, shape (N, s)
         eigv_avg: Corresponding Eigenvalues. numpy array, shape (s, )
-        G: A wrapped up Generator. 
-        ref_code: Reference code z_0, of shape (1, N). Default to be the origin in N d space, np.zeros(1, N). 
-    
-    Printing parameters: 
-        eig_rng: another form to specify range or eigen pairs to visualize. A tuple of 2 integers. 
-        eiglist: a list ot eigen indices to visualize, start from 0. 
-        page_B: Page limit, number of reference vectors to show on each page / figure. 
+        G: A wrapped up Generator.
+        ref_code: Reference code z_0, of shape (1, N). Default to be the origin in N d space, np.zeros(1, N).
+
+    Printing parameters:
+        eig_rng: another form to specify range or eigen pairs to visualize. A tuple of 2 integers.
+        eiglist: a list ot eigen indices to visualize, start from 0.
+        page_B: Page limit, number of reference vectors to show on each page / figure.
         transpose: True means each column shows an eigenvector; False means each row shows an eigenvector.
 
     Exploration parameters:
-        sphere: Bool, True to do spherical exploration, False for linear exploration. 
+        sphere: Bool, True to do spherical exploration, False for linear exploration.
         maxdist: A scaler, maximal distance to explore in the latent space. if sphere is False, then this is L2 distance along the eigenvector
             if sphere is True, then this is the angle (in rad, [0, pi/2]) to turn towards the eigenvector
         rown: An integer. Number of image to generate for each eigenvector. Normally an odd integer to make the center image the reference image.
-            if transpose is True, this is the number of images each row. 
-    
+            if transpose is True, this is the number of images each row.
+
     Save parameters:
-        figdir: Directory to output figures. 
+        figdir: Directory to output figures.
         namestr: Prefix for the saved figure.
         RND: Random number identifier for saved figure. (same for each sequence. default to be 4 digits RND)
 
@@ -91,51 +91,51 @@ def vis_eigen_frame(eigvect_avg, eigv_avg, G, ref_code=None, eiglist=None, eig_r
             csr = idx + 1
     return mtg, codes_col
 
-def vis_eigen_explore(ref_code, eigvect_avg, eigv_avg, G, ImDist=None, eiglist=[1,2,4,7,16], transpose=True, 
-                      maxdist=120, scaling=None, rown=5, sphere=False, distrown=19, 
+def vis_eigen_explore(ref_code, eigvect_avg, eigv_avg, G, ImDist=None, eiglist=[1,2,4,7,16], transpose=True,
+                      maxdist=120, scaling=None, rown=5, sphere=False, distrown=19,
                       save=True, figdir="", RND=None, namestr=""):
     """ Visualize image content of moving along eigenvectors at a `ref_code`
     Plot image distance curve for these directions if ImDist provided.
-    
+
     Input:
-        ref_code: Reference code z_0, of shape (1, N) or (N, ). Default to be the origin in N d space, np.zeros(1, N). 
+        ref_code: Reference code z_0, of shape (1, N) or (N, ). Default to be the origin in N d space, np.zeros(1, N).
         eigvect_avg: Eigenvectors to visualize, numpy array, shape (N, s)
         eigv_avg: Corresponding Eigenvalues. numpy array, shape (s, )
-        G: A wrapped up Generator. 
-        ImDist: Image distance function. If specified then compute the distance curve as well. 
+        G: A wrapped up Generator.
+        ImDist: Image distance function. If specified then compute the distance curve as well.
             distrown: parameter for ploting image distance curve.
-    
-    Printing parameters: 
-        eig_rng: another form to specify range or eigen pairs to visualize. A tuple of 2 integers. 
-        eiglist: a list ot eigen indices to visualize, start from 0. 
-        page_B: Page limit, number of reference vectors to show on each page / figure. 
+
+    Printing parameters:
+        eig_rng: another form to specify range or eigen pairs to visualize. A tuple of 2 integers.
+        eiglist: a list ot eigen indices to visualize, start from 0.
+        page_B: Page limit, number of reference vectors to show on each page / figure.
         transpose: True means each column shows an eigenvector; False means each row shows an eigenvector.
 
     Exploration parameters:
-        sphere: Bool, True to do spherical exploration, False for linear exploration. 
+        sphere: Bool, True to do spherical exploration, False for linear exploration.
         maxdist: A scaler, maximal distance to explore in the latent space. if sphere is False, then this is L2 distance along the eigenvector
             if sphere is True, then this is the angle (in rad, [0, pi/2]) to turn towards the eigenvector
         rown: An integer. Number of image to generate for each eigenvector. Normally an odd integer to make the center image the reference image.
-            if transpose is True, this is the number of images each row. 
-        **scaling**: An array specifying the scaling factor for each eigvect to plot, s.t. actual maximal travelling distance or angle will be 
-            (-scaling[i] * maxdist, scaling[i] * maxdist).  Array or list of shape (len(eiglist), )  
-    
+            if transpose is True, this is the number of images each row.
+        **scaling**: An array specifying the scaling factor for each eigvect to plot, s.t. actual maximal travelling distance or angle will be
+            (-scaling[i] * maxdist, scaling[i] * maxdist).  Array or list of shape (len(eiglist), )
+
     Save parameters:
-        figdir: Directory to output figures. 
+        figdir: Directory to output figures.
         namestr: Prefix for the saved figure.
         RND: Random number identifier for saved figure. (same for each sequence. default to be 4 digits RND)
 
     Output:
         mtg: montage image, np array
         codes_col: list of codes for visualization.
-        distmat, fig: will be returned if the image distance plot is done. 
+        distmat, fig: will be returned if the image distance plot is done.
     """
     if RND is None: RND = np.random.randint(10000)
     if eiglist is None: eiglist = list(range(len(eigv_avg)))
     if scaling is None: scaling = np.ones(len(eigv_avg))
     t0 = time()
     codes_page = []
-    for idx, eigi in enumerate(eiglist):  
+    for idx, eigi in enumerate(eiglist):
         scaler = scaling[idx]
         if not sphere:
             interp_codes = LExpMap(ref_code, eigvect_avg[:, -eigi-1], rown, (-maxdist*scaler, maxdist*scaler))
@@ -143,7 +143,7 @@ def vis_eigen_explore(ref_code, eigvect_avg, eigv_avg, G, ImDist=None, eiglist=[
             interp_codes = SExpMap(ref_code, eigvect_avg[:, -eigi-1], rown, (-maxdist*scaler, maxdist*scaler))
         codes_page.append(interp_codes)
     codes_all = np.concatenate(tuple(codes_page), axis=0)
-    img_page = G.render(codes_all)
+    img_page = G.render(codes_all, B=2)
     mtg = build_montages(img_page, (256, 256), (rown, len(eiglist)), transpose=transpose)[0]
     if save:
         imsave(join(figdir, "%s_%d-%d_%04d.jpg" % (namestr, eiglist[0]+1, eiglist[-1]+1, RND)), np.uint8(mtg * 255.0))
@@ -159,12 +159,12 @@ def vis_eigen_explore(ref_code, eigvect_avg, eigv_avg, G, ImDist=None, eiglist=[
     else:
         return mtg, codes_all
 
-def vis_eigen_explore_row(ref_code, eigvect_avg, eigv_avg, G, eiglist=[1,2,4,7,16], transpose=True, 
-     maxdist=120, rown=5, sphere=False, 
-     save=True, figdir="", RND=None, namestr="", indivimg=False):  
-    """ Same as `vis_eigen_explore` but save each each row separately. 
+def vis_eigen_explore_row(ref_code, eigvect_avg, eigv_avg, G, eiglist=[1,2,4,7,16], transpose=True,
+     maxdist=120, rown=5, sphere=False,
+     save=True, figdir="", RND=None, namestr="", indivimg=False):
+    """ Same as `vis_eigen_explore` but save each each row separately.
     Additional Parameter:
-        indivimg: Save individual image separately. 
+        indivimg: Save individual image separately.
     """
     if RND is None: RND = np.random.randint(10000)
     if eiglist is None: eiglist = list(range(len(eigv_avg)))
@@ -172,7 +172,7 @@ def vis_eigen_explore_row(ref_code, eigvect_avg, eigv_avg, G, eiglist=[1,2,4,7,1
     codes_page = []
     mtg_col = []
     ticks = np.linspace(-maxdist, maxdist, rown)
-    for idx, eigi in enumerate(eiglist):  
+    for idx, eigi in enumerate(eiglist):
         if not sphere:
             interp_codes = LExpMap(ref_code, eigvect_avg[:, -eigi-1], rown, (-maxdist, maxdist))
         else:
@@ -186,7 +186,7 @@ def vis_eigen_explore_row(ref_code, eigvect_avg, eigv_avg, G, eiglist=[1,2,4,7,1
         else:
             show_npimage(mtg)
         mtg_col.append(mtg)
-        if indivimg and save: # save individual images. 
+        if indivimg and save: # save individual images.
             for deviation, img in zip(ticks, img_page):
                 imsave(join(figdir, "%s_eig%d_%.1e_%04d.jpg" % (namestr,eigi+1, deviation, RND)), np.uint8(img * 255.0))
     codes_all = np.concatenate(tuple(codes_page), axis=0)
@@ -194,42 +194,42 @@ def vis_eigen_explore_row(ref_code, eigvect_avg, eigv_avg, G, eiglist=[1,2,4,7,1
     return mtg_col, codes_all
 
 def vis_distance_curve(ref_code, eigvect_avg, eigvals_avg, G, ImDist, eiglist=[1,2,4,7,16],
-	    maxdist=0.3, rown=3, distrown=19, sphere=False, 
+	    maxdist=0.3, rown=3, distrown=19, sphere=False,
         figdir="", RND=None, namestr="", ):
-    """Compute image distance to reference as a function of explore distance. 
+    """Compute image distance to reference as a function of explore distance.
     Input:
-        ref_code: Reference code z_0, of shape (1, N). Default to be the origin in N d space, np.zeros(1, N). 
+        ref_code: Reference code z_0, of shape (1, N). Default to be the origin in N d space, np.zeros(1, N).
         eigvect_avg: Eigenvectors to visualize, numpy array, shape (N, s)
         eigv_avg: Corresponding Eigenvalues. numpy array, shape (s, )
-        G: A wrapped up Generator. 
+        G: A wrapped up Generator.
         ImDist: image distance function, like LPIPS
-    
-    Printing parameters: 
-        eiglist: a list ot eigen indices to visualize,  start from 0. 
+
+    Printing parameters:
+        eiglist: a list ot eigen indices to visualize,  start from 0.
         distrown: number of samples to compute distance curve for each eigenvector
-        rown: number of x ticks to show for the curve. 
+        rown: number of x ticks to show for the curve.
 
     Exploration parameters:
-        sphere: Bool, True to do spherical exploration, False for linear exploration. 
+        sphere: Bool, True to do spherical exploration, False for linear exploration.
         maxdist: A scaler, maximal distance to explore in the latent space. if sphere is False, then this is L2 distance along the eigenvector
             if sphere is True, then this is the angle (in rad, [0, pi/2]) to turn towards the eigenvector
-        
+
     Save parameters:
-        figdir: Directory to output figures. 
+        figdir: Directory to output figures.
         namestr: Prefix for the saved figure.
         RND: Random number identifier for saved figure. (same for each sequence. default to be 4 digits RND)
 
     Output:
-        distmat: distance curve for each eigenvector, concatenated in a matrix. 
-        ticks: x ticks for the distance matrix. 
+        distmat: distance curve for each eigenvector, concatenated in a matrix.
+        ticks: x ticks for the distance matrix.
         fig: Figure handle
     """
     if RND is None: RND = np.random.randint(10000)
-    refimg = G.visualize_batch_np(ref_code.reshape(1, -1))
+    refimg = G.visualize_batch_np(ref_code.reshape(1, -1))      #1,3,256,256-> this is a reference image for the plot
     codes_page = []
     ticks = np.linspace(-maxdist, maxdist, distrown, endpoint=True)
     visticks = np.linspace(-maxdist, maxdist, rown, endpoint=True) # actual x ticks to show.
-    for idx, eigi in enumerate(eiglist):  
+    for idx, eigi in enumerate(eiglist):
         if not sphere:
             interp_codes = LExpMap(ref_code, eigvect_avg[:, -eigi - 1], distrown, (-maxdist, maxdist))
         else:
@@ -237,9 +237,18 @@ def vis_distance_curve(ref_code, eigvect_avg, eigvals_avg, G, ImDist, eiglist=[1
         codes_page.append(interp_codes)
         # if (idx == csr + page_B - 1) or idx + 1 == len(eiglist):
     codes_all = np.concatenate(tuple(codes_page), axis=0)
-    img_page = G.visualize_batch_np(codes_all)
+    img_page = G.visualize_batch_np(codes_all, B=2) #returns a np array (75,3,256,256)
+
+    #### modified this part to handle batches of data:
     with torch.no_grad():
-        dist_all = ImDist(refimg.cuda(), img_page.cuda()).squeeze().cpu()
+        dist_all = []
+        batches = torch.split(img_page, int(np.ceil(img_page.shape[0] / 5)))
+
+        for batch in batches:
+            tmp = ImDist(refimg.cuda(), batch.cuda()).squeeze().cpu()
+            dist_all.append(tmp)
+    dist_all = torch.cat(dist_all)
+
     distmat = dist_all.reshape(-1, distrown).numpy()
     fig = plt.figure(figsize=[5, 3])
     for idx, eigi in enumerate(eiglist):
@@ -254,30 +263,30 @@ def vis_distance_curve(ref_code, eigvect_avg, eigvals_avg, G, ImDist, eiglist=[1
     plt.show()
     return distmat, ticks, fig
 
-def vis_eigen_action(eigvec, ref_codes, G, maxdist=120, rown=7, sphere=False, 
+def vis_eigen_action(eigvec, ref_codes, G, maxdist=120, rown=7, sphere=False,
                     page_B=50, transpose=True, save=True, figdir="", namestr="", RND=None):
     """ Visualize action of an eigenvector on multiple reference images.
-    
+
     Input:
         ref_codes: Reference codes z_0, of shape (r, N) or (N, r). r is the number of z_0 to compare.
-            Default to be the origin in N d space, np.zeros(1, N). 
+            Default to be the origin in N d space, np.zeros(1, N).
         eigvect_avg: Eigenvector to visualize, assume there is only one. numpy array, shape (N, 1) or (N,) or (1,N)
-        G: A wrapped up Generator. 
-    
-    Printing parameters: 
-        page_B: Page limit, number of reference vectors to show on each page / figure. 
+        G: A wrapped up Generator.
+
+    Printing parameters:
+        page_B: Page limit, number of reference vectors to show on each page / figure.
         transpose: True means each column shows an eigenvector; False means each row shows an eigenvector.
 
     Exploration parameters:
-        sphere: Bool, True to do spherical exploration, False for linear exploration. 
+        sphere: Bool, True to do spherical exploration, False for linear exploration.
         maxdist: A scaler, maximal distance to explore in the latent space. if sphere is False, then this is L2 distance along the eigenvector
             if sphere is True, then this is the angle (in rad, [0, pi/2]) to turn towards the eigenvector
         rown: An integer. Number of image to generate for each eigenvector. Normally an odd integer to make the center image the reference image.
-            if transpose is True, this is the number of images each row. 
-        
+            if transpose is True, this is the number of images each row.
+
     Save parameters:
         save: Bool. save figure or just show.
-        figdir: Directory to output figures. 
+        figdir: Directory to output figures.
         namestr: Prefix for the saved figure.
         RND: Random number identifier for saved figure. (same for each sequence. default to be 4 digits RND)
 
@@ -293,7 +302,7 @@ def vis_eigen_action(eigvec, ref_codes, G, maxdist=120, rown=7, sphere=False,
     csr = 0
     codes_page = []
     codes_col = []
-    for idx, ref_code in enumerate(reflist):  
+    for idx, ref_code in enumerate(reflist):
         if not sphere:
             interp_codes = LExpMap(ref_code, eigvec, rown, (-maxdist, maxdist))
         else:
@@ -314,11 +323,11 @@ def vis_eigen_action(eigvec, ref_codes, G, maxdist=120, rown=7, sphere=False,
             csr = idx + 1
     return mtg, codes_col
 
-def vis_eigen_action_row(eigvec, ref_codes, G, maxdist=120, rown=7, sphere=False, 
+def vis_eigen_action_row(eigvec, ref_codes, G, maxdist=120, rown=7, sphere=False,
                     transpose=True, save=True, figdir="", namestr="", RND=None, indivimg=False,):
     """Same as `vis_eigen_action` just print each row separately
     Additional Parameter:
-        indivimg: Save individual image separately. 
+        indivimg: Save individual image separately.
     """
     if ref_codes is None:
         ref_codes = np.zeros(eigvec.size)
@@ -328,7 +337,7 @@ def vis_eigen_action_row(eigvec, ref_codes, G, maxdist=120, rown=7, sphere=False
     codes_col = []
     mtg_col = []
     ticks = np.linspace(-maxdist, maxdist, rown)
-    for idx, ref_code in enumerate(reflist):  
+    for idx, ref_code in enumerate(reflist):
         if not sphere:
             interp_codes = LExpMap(ref_code, eigvec, rown, (-maxdist, maxdist))
         else:
@@ -533,4 +542,3 @@ if __name__ == "__main__":
         print("Finish printing eigenvalue %d"%eigid)
 
     #%
-

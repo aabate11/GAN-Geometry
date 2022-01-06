@@ -629,14 +629,14 @@ class DCGAN_wrapper():  # nn.Module
 class StyleGAN2CUSTOM_wrapper():
     def __init__(self, SGAN):
         self.sgan = SGAN
-        self.class = None   #necessary class label for unconditional gan
+        self.c = None   #necessary class label for unconditional gan
 
     def sample_vector(self, sampn=1, device="cuda"):
         refvec = torch.randn((sampn, self.sgan.z_dim)).to(device)
         return refvec
 
     def visualize(self, code, scale=1.0):
-        imgs = self.sgan(code, self.class)
+        imgs = self.sgan(code, self.c)
         return torch.clamp((imgs + 1.0) / 2.0, 0, 1) * scale
 
     def visualize_batch_np(self, codes_all_arr, scale=1.0, B=5):

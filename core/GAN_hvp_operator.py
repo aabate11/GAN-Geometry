@@ -66,11 +66,11 @@ class GANHVPOperator(Operator):
         if hasattr(criterion,"parameters"):
             for param in criterion.parameters():
                 param.requires_grad_(False)
-        self.model = model  # model is the generator 
-        self.preprocess = preprocess  # preprocess the generated `x` (e.g. images) before measuring dissimilarity. 
-        self.criterion = criterion  # distance function in generated space `d(x_1,x_2)`. or objective `d(x_1)` in activation case. 
-        self.code = code.clone().requires_grad_(False).float().to(device)  # reference code z_0 to measure Hessian at. 
-        self.size = self.code.numel()  # n, the input dimension to generator, i.e. latent space dimension. 
+        self.model = model  # model is the generator
+        self.preprocess = preprocess  # preprocess the generated `x` (e.g. images) before measuring dissimilarity.
+        self.criterion = criterion  # distance function in generated space `d(x_1,x_2)`. or objective `d(x_1)` in activation case.
+        self.code = code.clone().requires_grad_(False).float().to(device)  # reference code z_0 to measure Hessian at.
+        self.size = self.code.numel()  # n, the input dimension to generator, i.e. latent space dimension.
         self.perturb_vec = 0.0001 * torch.randn((1, self.size), dtype=torch.float32).requires_grad_(True).to(
             device)  # dimension debugged @Sep 10
         self.activation = activation
@@ -78,32 +78,32 @@ class GANHVPOperator(Operator):
             self.img_ref = self.model.visualize(self.code + self.perturb_vec)
             activ = self.criterion(self.preprocess(self.img_ref))
             gradient = torch.autograd.grad(activ, self.perturb_vec, create_graph=True, retain_graph=True)[0]
-        else:  # By default, `criterion` is a binary distance function. 
+        else:  # By default, `criterion` is a binary distance function.
             self.img_ref = self.model.visualize(self.code, )  # forward the feature vector through the GAN
             img_pertb = self.model.visualize(self.code + self.perturb_vec)
             d_sim = self.criterion(self.preprocess(self.img_ref), self.preprocess(img_pertb))
             # similarity metric between 2 images.
             gradient = torch.autograd.grad(d_sim, self.perturb_vec, create_graph=True, retain_graph=True)[0]
-            # 1st order gradient, saved, enable 2nd order gradient. 
+            # 1st order gradient, saved, enable 2nd order gradient.
         self.gradient = gradient.view(-1)
 
     def select_code(self, code):
         """ Select a (new) reference code `z` to compute Hessian at. H|_z
-        Input: 
-            code: torch tensor of shape `[1, n]` 
+        Input:
+            code: torch tensor of shape `[1, n]`
         """
         self.code = code.clone().requires_grad_(False).float().to(self.device) # torch.float32
         self.size = self.code.numel()
         self.perturb_vec = torch.zeros((1, self.size), dtype=torch.float32).requires_grad_(True).to(self.device)
         self.img_ref = self.model.visualize(self.code, )  # forward the feature vector through the GAN: G(z), without gradient.
-        img_pertb = self.model.visualize(self.code + self.perturb_vec)  # forward feature vector + perturb: G(z+dz), enable gradient. 
+        img_pertb = self.model.visualize(self.code + self.perturb_vec)  # forward feature vector + perturb: G(z+dz), enable gradient.
         d_sim = self.criterion(self.preprocess(self.img_ref), self.preprocess(img_pertb))  # compute d = D(G(z), G(z+dz)), enable gradient
-        gradient = torch.autograd.grad(d_sim, self.perturb_vec, create_graph=True, retain_graph=True)[0] # compute `\partial d/\partial dz` 
-        self.gradient = gradient.view(-1) 
+        gradient = torch.autograd.grad(d_sim, self.perturb_vec, create_graph=True, retain_graph=True)[0] # compute `\partial d/\partial dz`
+        self.gradient = gradient.view(-1)
         self.size = self.perturb_vec.numel()
 
     def apply(self, vec):
-        """ Compute Hessian Vector Product(HVP) of `vec` using forward differencing method. 
+        """ Compute Hessian Vector Product(HVP) of `vec` using forward differencing method.
         Here we implement the forward difference approximation of HVP.
               $Hv|_x = \partial_dz g(x)^Tv|_{x+dz}$
         Input:
@@ -147,7 +147,7 @@ class GANHVPOperator(Operator):
 
 
 class GANForwardHVPOperator(Operator):
-    """ Uses forward autodifferencing to compute HVP for unary, activation D 
+    """ Uses forward autodifferencing to compute HVP for unary, activation D
         This class amalgamates the structure of Lucent and hessian_eigenthings
     """
     def __init__(
@@ -180,9 +180,9 @@ class GANForwardHVPOperator(Operator):
 
     def select_code(self, code):
         """ Select a (new) reference code `z_0` to compute Hessian at. H|_z
-        Input: 
-            code: torch tensor of shape `[1, n]` 
-        """ 
+        Input:
+            code: torch tensor of shape `[1, n]`
+        """
         self.code = code.clone().requires_grad_(False).float().to(self.device)  # torch.float32
         self.perturb_norm = self.code.norm() * self.EPS
         self.img_ref = self.model.visualize(self.code + self.perturb_vec)
@@ -192,15 +192,15 @@ class GANForwardHVPOperator(Operator):
         self.gradient = gradient.view(-1)
 
     def apply(self, vec, EPS=None):
-        """ Compute Hessian Vector Product(HVP) of `vec` using forward differencing method. 
+        """ Compute Hessian Vector Product(HVP) of `vec` using forward differencing method.
         Here we implement the forward difference approximation of HVP.
               $Hv|_x \approx (g(x + eps*v) - g(x - eps*v)) / (2*eps)$
         Input:
             vec: Vector to product with Hessian. a torch vector of shape `[1, n]`
 
         Parameter:
-            EPS: a float number, to specify the finite difference ratio for input vector. 
-                Default to be self.EPS set at init. 
+            EPS: a float number, to specify the finite difference ratio for input vector.
+                Default to be self.EPS set at init.
                 To ensure accuracy independent of norm of `vec` the perturbed vector $eps*v$ will be of norm `code.norm() * EPS`
 
         Returns:
@@ -242,7 +242,7 @@ class GANForwardHVPOperator(Operator):
 
 class GANForwardMetricHVPOperator(Operator):
     """This part amalgamates the structure of `Lucent` and `hessian_eigenthings`
-    It adapts GANForwardHVPOperator for binary entries, metric function D. 
+    It adapts GANForwardHVPOperator for binary entries, metric function D.
     """
     def __init__(
             self,
@@ -252,8 +252,9 @@ class GANForwardMetricHVPOperator(Operator):
             preprocess=lambda img: F.interpolate(img, (256, 256), mode='bilinear', align_corners=True),
             use_gpu=True,
             EPS=1E-2,
+            device="cuda"
     ):
-        device = "cuda" if use_gpu else "cpu"
+        # device = "cuda" if use_gpu else "cpu"
         self.device = device
         if hasattr(model, "parameters"):
             for param in model.parameters():
@@ -274,9 +275,9 @@ class GANForwardMetricHVPOperator(Operator):
 
     def select_code(self, code):
         """ Select a (new) reference code `z_0` to compute Hessian at. H|_z
-        Input: 
-            code: torch tensor of shape `[1, n]` 
-        """ 
+        Input:
+            code: torch tensor of shape `[1, n]`
+        """
         self.code = code.clone().requires_grad_(False).float().to(self.device)  # torch.float32
         self.perturb_norm = self.code.norm() * self.EPS
         self.img_ref = self.model.visualize(self.code)
@@ -316,7 +317,7 @@ class GANForwardMetricHVPOperator(Operator):
             vec: Vector to product with Hessian. a torch vector of shape `[1, n]`
 
         Returns:
-            vhv: Bilinear form vec.T*H*vec. where H is the hessian of D output. a torch scalar. 
+            vhv: Bilinear form vec.T*H*vec. where H is the hessian of D output. a torch scalar.
         """
         hessian_vec_prod = self.apply(vec)
         vhv = (hessian_vec_prod * vec).sum()

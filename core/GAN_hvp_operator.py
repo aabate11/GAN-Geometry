@@ -295,7 +295,7 @@ class GANForwardMetricHVPOperator(Operator):
         """
         vecnorm = vec.norm()
         if vecnorm < 1E-8:
-            return torch.zeros_like(vec).cuda()
+            return torch.zeros_like(vec).to(self.device)
         EPS = self.EPS if EPS is None else EPS
         self.perturb_norm = self.code.norm() * EPS
         eps = (self.perturb_norm / vecnorm).float()

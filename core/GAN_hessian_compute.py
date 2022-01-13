@@ -47,7 +47,7 @@ def hessian_compute(G, feat, ImDist, hessian_method="BackwardIter", cutoff=None,
         H = eigvects @ np.diag(eigvals) @ eigvects.T
     elif hessian_method == "ForwardIter":
         metricHVP = GANForwardMetricHVPOperator(G, feat, ImDist, preprocess=preprocess, EPS=EPS, device=device)  # 1E-3,)
-        eigvals, eigvects = lanczos(metricHVP, num_eigenthings=cutoff, use_gpu=True, max_steps=200, tol=1e-6, )
+        eigvals, eigvects = lanczos(metricHVP, num_eigenthings=cutoff, use_gpu=True, max_steps=200, tol=1e-6, device=device)
         eigvects = eigvects.T
         H = eigvects @ np.diag(eigvals) @ eigvects.T
     elif hessian_method == "BP":
